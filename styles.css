@@ -1,0 +1,134 @@
+body {
+    --mt-global-color-red: #fb1717;
+    --mt-global-color-blue: #3b609b;
+    --mt-global-color-blue-light: #00a2e9;
+    --mt-global-color-blue-dark: #1f3165;
+    --mt-global-color-blue-hover: #0095da;
+    --mt-global-color-white: #ffffff;
+    --mt-global-color-black: #333333;
+    --mt-global-color-black_20: ;
+    --mt-global-color-black_40: #666666;
+    --mt-global-color-black_60: #999999;
+    --mt-global-color-gray: #5d6166;
+    background-color: lightgray;
+    font-size: 16px;
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+.chatbot {
+    max-width: 896px; 
+    margin: auto;
+    padding: 16px;
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    background: lightgray;
+    box-sizing: border-box;
+    min-height: 0;
+
+}
+
+.chatbot-section {
+    display: flex; 
+    flex-direction:column;
+    background-color: var(--mt-global-color-white);
+    border-radius: 10px;
+    height: 100vh;
+}
+
+/* Innoscience Logo */ 
+
+.chat-header {
+    padding: 4px 16px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    flex-direction: column;
+
+}
+.chat-header img {
+    height: 40px; 
+    width: auto;
+
+}
+
+.chat-example {
+    display: flex; 
+    margin-left: 20px;
+    margin-right: auto;
+    background-color: rgb(202, 200, 200);
+}
+
+/* Chatbot history / user questions & answers */
+
+.chat-history {
+    overflow-y: auto; 
+    flex:1;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    background-color: var(--mt-global-color-white);
+    display: flex; 
+    flex-direction: column;
+    gap: 8px; 
+    padding: 12px;
+    min-height:0;
+}
+
+.user-message {
+    align-self: flex-end;
+    background: var(--mt-global-color-blue);
+    color: white;
+    padding: 8px 12px; 
+    border-radius: 12px; 
+    max-width: 70%;
+    
+}
+
+.bot-message {
+    align-self: flex-start; 
+    background: var(--mt-global-color-blue-dark);
+    color: white; 
+    padding: 8px 12px; 
+    border-radius: 12px; 
+    max-width: 70%;
+}
+
+/* Where users input questions */
+
+.chat-input {
+    border-top: 1px solid lightgray;
+    display: flex; 
+    align-items: center;
+    padding: 16px 16px;
+    gap: 7px;
+    background-color: white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+
+    
+}
+.chat-input .input-box {
+    flex: 1; 
+    border-radius: 10px;
+    padding: 12px;
+    background-color: lightgray;
+    line-height:1;
+     border-color: transparent;
+    
+}
+.chat-input button {
+    font-size: 20px; 
+    color: var(--mt-global-color-white);
+    padding: 12px; 
+    border-radius: 10px;
+    background-color: var(--mt-global-color-blue);
+    cursor: pointer;
+    border: none;
+
+}
+
+
+/* Couple of example questions user can ask */
+
