@@ -2,56 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Interactive chatbot to answer your application-related questions">
+    <meta name="theme-color" content="#3b609b">
+    <title>Chatbot - Ask Me Anything</title>
     
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script defer src = "chatbot.js" > </script>
+    <script defer src="chatbot.js"></script>
 </head>
 <body>
-    <div class = chatbot> 
-        <section class = "chat-header">
-            <img src="logo.png" alt="Logo" class="chat_logo">
-            <p> Ask me application related questions! </p>
-        </section>
-        <section class = chatbot-section> 
-            <section class = "chat-history">
-                <div class = "message bot ">
-                    <div class = "avatar">
+    <div class="chatbot" role="main" aria-label="Chatbot interface"> 
+        <header class="chat-header" role="banner">
+            <img src="logo.png" alt="Company Logo" class="chat_logo">
+            <p>Ask me application related questions!</p>
+        </header>
+        <section class="chatbot-section" aria-label="Chat conversation"> 
+            <div class="chat-history" role="log" aria-live="polite" aria-label="Chat messages">
+                <div class="message bot">
+                    <div class="avatar" aria-hidden="true">
                         <i data-lucide="bot" class="lucide-icon"></i>
                     </div>
-                    <div class = "bubble">
+                    <div class="bubble">
                         Hello! I'm here to help you answer your questions. You can type 
                         a question or click on one of the examples below.
                     </div>
                 </div>
-                
-            </section>
-            <section class = "chat-example">
-                <p> Try these example questions: </p>
-                <ul>
-                    <li> What is the purpose of the chatbot? </li>
-                    <li> How does the chatbot work? </li>
-                    <li> What is the chatbot's name? </li>
-                    <li> What is the chatbot's favorite color? </li>
-                    <li> What is the chatbot's favorite food? </li>
+            </div>
+            <section class="chat-example" aria-label="Example questions">
+                <p>Try these example questions:</p>
+                <ul role="list">
+                    <li role="button" tabindex="0">What is the purpose of the chatbot?</li>
+                    <li role="button" tabindex="0">How does the chatbot work?</li>
+                    <li role="button" tabindex="0">What is the chatbot's name?</li>
+                    <li role="button" tabindex="0">What is the chatbot's favorite color?</li>
+                    <li role="button" tabindex="0">What is the chatbot's favorite food?</li>
                 </ul>
             </section>
 
-            <section class = "chat-input">
-                <input type="text" placeholder="Type your message here..." class="input-box">
-                <button class = "send-btn">
-                    <i class="fa-solid fa-paper-plane send-icon"></i>
+            <section class="chat-input" role="form" aria-label="Message input">
+                <input 
+                    type="text" 
+                    placeholder="Type your message here..." 
+                    class="input-box"
+                    aria-label="Message input"
+                    autocomplete="off"
+                    maxlength="500"
+                >
+                <button 
+                    class="send-btn" 
+                    type="button"
+                    aria-label="Send message"
+                    title="Send message"
+                >
+                    <i class="fa-solid fa-paper-plane send-icon" aria-hidden="true"></i>
                 </button>
-  
             </section>
-
         </section>
-
     </div>
-    
-
 </body>
 </html>
