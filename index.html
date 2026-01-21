@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src = "chatbot.js" defer> </script>
+    
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src = "chatbot.js" > </script>
 </head>
 <body>
     <div class = chatbot> 
@@ -18,7 +18,26 @@
         </section>
         <section class = chatbot-section> 
             <section class = "chat-history">
+                <div class = "message bot ">
+                    <div class = "avatar">
+                        <i data-lucide="bot" class="lucide-icon"></i>
+                    </div>
+                    <div class = "bubble">
+                        Hello! I'm here to help you answer your questions. You can type 
+                        a question or click on one of the examples below.
+                    </div>
+                </div>
                 
+            </section>
+            <section class = "chat-example">
+                <p> Try these example questions: </p>
+                <ul>
+                    <li> What is the purpose of the chatbot? </li>
+                    <li> How does the chatbot work? </li>
+                    <li> What is the chatbot's name? </li>
+                    <li> What is the chatbot's favorite color? </li>
+                    <li> What is the chatbot's favorite food? </li>
+                </ul>
             </section>
 
             <section class = "chat-input">

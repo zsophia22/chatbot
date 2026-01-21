@@ -12,9 +12,10 @@ body {
     --mt-global-color-gray: #5d6166;
     background-color: lightgray;
     font-size: 16px;
-    height: 100%;
+    font-weight: 400;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"
 
 }
 .chatbot {
@@ -35,7 +36,9 @@ body {
     flex-direction:column;
     background-color: var(--mt-global-color-white);
     border-radius: 10px;
-    height: 100vh;
+    flex: 1; 
+    min-height: 0; 
+    overflow: hidden;
 }
 
 /* Innoscience Logo */ 
@@ -54,13 +57,6 @@ body {
 
 }
 
-.chat-example {
-    display: flex; 
-    margin-left: 20px;
-    margin-right: auto;
-    background-color: rgb(202, 200, 200);
-}
-
 /* Chatbot history / user questions & answers */
 
 .chat-history {
@@ -72,27 +68,140 @@ body {
     display: flex; 
     flex-direction: column;
     gap: 8px; 
-    padding: 12px;
+    padding: 24px 20px;
     min-height:0;
+    margin-bottom: 6px;
 }
 
-.user-message {
-    align-self: flex-end;
-    background: var(--mt-global-color-blue);
-    color: white;
-    padding: 8px 12px; 
-    border-radius: 12px; 
+/* Message Container - Base Styles */
+.message {
+    display: flex; 
     max-width: 70%;
-    
+    gap: 7px;
+    align-items: flex-start;
+    margin-bottom: 12px;
 }
 
-.bot-message {
+/* User Message - Right Aligned */
+.message.user {
+    align-self: flex-end; 
+    flex-direction: row-reverse; 
+}
+
+/* Bot Message - Left Aligned */
+.message.bot {
     align-self: flex-start; 
-    background: var(--mt-global-color-blue-dark);
-    color: white; 
+}
+
+/* Message Bubble - Shared Styles */
+.message .bubble {
+    border-radius: 12px;
     padding: 8px 12px; 
+    color: white;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.message.user .bubble {
+    background-color: var(--mt-global-color-blue-light);
+}
+
+.message.bot .bubble {
+    background-color: var(--mt-global-color-blue-dark);
+}
+
+/* Avatar - Shared Base Styles */
+.avatar {
+    border-radius: 100%; 
+    height: 18px; 
+    width: 18px;
+    padding: 8px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: white; 
+    flex-shrink: 0;
+}
+
+.message.user .avatar {
+    background-color: var(--mt-global-color-blue-light);
+}
+
+.message.bot .avatar {
+    background-color: var(--mt-global-color-blue-dark);
+}
+
+.typing-indicator .bubble {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
     border-radius: 12px; 
-    max-width: 70%;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: white;
+    opacity: 0.4;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+/* Where example questions are displayed */
+.chat-example {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    background-color: #f3f3f5;
+    border-top: 1px solid lightgray;
+}
+
+.chat-example p {
+    font-weight: 400;
+    margin: 0;
+    padding: 0;
+}
+.chat-example ul {
+    list-style: none;
+    display: flex; 
+    flex-wrap: wrap;
+    padding: 0;
+    gap: 4px;
+    margin: 2px;
+
+}
+.chat-example ul li {
+    padding: 4px 8px;
+    background-color: var(--mt-global-color-black_60);
+    border-radius: 10px;
+    color: var(--mt-global-color-white);
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.chat-example ul li:hover {
+    background-color: var(--mt-global-color-blue-light);
 }
 
 /* Where users input questions */
@@ -106,28 +215,41 @@ body {
     background-color: white;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-
-    
 }
 .chat-input .input-box {
     flex: 1; 
     border-radius: 10px;
-    padding: 12px;
-    background-color: lightgray;
+    padding: 8px 10px;
+    background-color: #f3f3f5;
     line-height:1;
-     border-color: transparent;
+    border-color: transparent;
+    outline: none;
+    font-size: 14px;
+    font-weight: 400;
+    
     
 }
+.chat-input .input-box:focus-visible {
+    border-color: rgba(59, 96, 155, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 96, 155, 0.5);
+    outline: none;
+}
 .chat-input button {
-    font-size: 20px; 
+    font-size: 16px; 
     color: var(--mt-global-color-white);
-    padding: 12px; 
+    padding: 10px; 
     border-radius: 10px;
-    background-color: var(--mt-global-color-blue);
+    background-color: var(--mt-global-color-blue-light);
+
     cursor: pointer;
     border: none;
 
 }
+.chat-input .input-box::placeholder {
+    font-size: 14px;  
+    font-weight: 400;
+}
+
 
 
 /* Couple of example questions user can ask */
