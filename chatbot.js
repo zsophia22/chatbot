@@ -159,22 +159,43 @@ function sendMessage() {
     /* Show typing indicator */
     showTypingIndicator();
     
-    /* MOCK BOT RESPONSE */
-    setTimeout(() => {
+    /* CALL BACKEND RAG API DIRECTLY */
+    fetch('http://20.168.112.204:8000/rag/query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question: text,
+            lang: 'en',  // Default to English, can be made configurable
+            num_results: 1,
+            score_threshold: null
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
         // Remove typing indicator
         removeTypingIndicator();
         
-        try {
-            const randomReply = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-            addMessage(randomReply, "bot");
-        } catch (error) {
-            console.error("Error adding bot message:", error);
-            addMessage("Sorry, I encountered an error. Please try again.", "bot");
-        } finally {
-            // Reset loading state
-            setLoadingState(false);
-        }
-    }, 1000 + Math.random() * 500); // Random delay between 1-1.5s for more natural feel
+        // Extract result from response (same format as call_back.py)
+        const result = data.result || data.answer || "(no result field in response)";
+        addMessage(result, "bot");
+    })
+    .catch(error => {
+        console.error("Error calling API:", error);
+        // Remove typing indicator
+        removeTypingIndicator();
+        addMessage("Sorry, I encountered an error connecting to the backend. Please try again.", "bot");
+    })
+    .finally(() => {
+        // Reset loading state
+        setLoadingState(false);
+    });
 }
 
 /* Event Listeners */
