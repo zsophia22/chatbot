@@ -102,7 +102,8 @@ function addMessage(text, sender) {
     
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    bubble.textContent = text;
+    // Replace line breaks with <br> tags for proper HTML rendering
+    bubble.innerHTML = text.replace(/\n/g, '<br>');
     bubble.setAttribute("aria-label", `${sender} message: ${text}`);
     
     message.appendChild(avatar);
@@ -130,6 +131,39 @@ function setLoadingState(loading) {
         submitButton.setAttribute("aria-busy", "false");
         inputText.focus();
     }
+}
+
+function parseQuestionAnswer(text) {
+    if (!text) return text;
+    
+    // Remove all dashes and equal signs
+    let cleaned = text.replace(/[-=]/g, '');
+    
+    // Split by "Question:" to get individual Q&A pairs
+    const qaPairs = cleaned.split(/Question:/i).filter(pair => pair.trim());
+    
+    let formatted = '';
+    
+    qaPairs.forEach((pair, index) => {
+        // Split by "Answer:" to separate question and answer
+        const parts = pair.split(/Answer:/i);
+        
+        if (parts.length === 2) {
+            const question = parts[0].trim();
+            const answer = parts[1].trim();
+            
+            // Add spacing and line breaks
+            if (index > 0) {
+                formatted += '\n\n'; // Add spacing between Q&A pairs
+            }
+            formatted += `Question:\n${question}\n\nAnswer:\n ${answer}`;
+        } else {
+            // If format doesn't match, just add the text as-is
+            formatted += (index > 0 ? '\n\n' : '') + pair.trim();
+        }
+    });
+    
+    return formatted || cleaned.trim();
 }
 
 function sendMessage() {
@@ -184,7 +218,9 @@ function sendMessage() {
         
         // Extract result from response (same format as call_back.py)
         const result = data.result || data.answer || "(no result field in response)";
-        addMessage(result, "bot");
+        // Parse and format the Q&A response
+        const formattedResult = parseQuestionAnswer(result);
+        addMessage(formattedResult, "bot");
     })
     .catch(error => {
         console.error("Error calling API:", error);
