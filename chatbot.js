@@ -1,55 +1,175 @@
-const EXAMPLE_QUESTIONS = [
-    "example question 1", 
-    "example question 2",
-    "example question 3", 
-    "example question 4"
-];
+/**
+ * Chatbot Application
+ * Handles user interactions, API communication, and UI updates
+ */
 
-const mockResponses = [
-    "That's a great question! I'd be happy to help you understand this better. The key points involve understanding the core functionality and how it benefits users.",
-    
-    "I understand what you're asking about. This is actually a common topic that comes up frequently. Let me explain the main factors to consider.",
-    
-    "Excellent question! This works through a combination of different components working together. The system processes your input and provides tailored responses.",
-    
-    "Thanks for asking! I can definitely help clarify this for you. The concept involves several interconnected parts designed to streamline processes efficiently.",
-    
-    "That's an interesting point you've raised. The system leverages modern technologies and best practices to deliver a robust, scalable solution.",
-    
-    "I appreciate you asking about this! The approach involves multiple layers of functionality, each serving a specific purpose to provide value to users.",
-    
-    "Great question! The process begins when you initiate an action, and the system goes through carefully designed stages to ensure accuracy and efficiency.",
-    
-    "That's a thoughtful question! The design philosophy centers around making complex processes simple and accessible through user-friendly interfaces."
-];
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
 
-let shouldAutoScroll = true; 
-const SCROLL_THRESHOLD = 100;
-let isProcessing = false;
+const CONFIG = {
+    API_URL: 'http://20.168.112.204:8000/rag/query',
+    API_LANG: 'en',
+    SCROLL_THRESHOLD: 100,
+    SCROLL_DEBOUNCE: 250,
+    RESIZE_DEBOUNCE: 250,
+    INPUT_MAX_LENGTH: 500,
+    SLIDER_MIN: 1,
+    SLIDER_MAX: 10,
+    SLIDER_DEFAULT: 1
+};
 
-const submitButton = document.querySelector(".send-btn");
-const inputText = document.querySelector(".input-box");
-const chatHistory = document.querySelector(".chat-history");
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
 
-function isNearButton() {
-    const scrollTop = chatHistory.scrollTop; // How far the user has scrolled from the top
-    const scrollHeight = chatHistory.scrollHeight; // Total height of the chat history
-    const clientHeight = chatHistory.clientHeight; // Visible height of the chat history
-    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    return distanceFromBottom <= SCROLL_THRESHOLD; // If the user is near the bottom of the chat history
+let state = {
+    isProcessing: false,
+    shouldAutoScroll: true
+};
+
+// ============================================================================
+// DOM ELEMENTS
+// ============================================================================
+
+const elements = {
+    submitButton: document.querySelector(".send-btn"),
+    inputText: document.querySelector(".input-box"),
+    chatHistory: document.querySelector(".chat-history"),
+    exampleSection: document.querySelector(".chat-example"),
+    exampleItems: document.querySelectorAll(".chat-example ul li"),
+    slider: document.getElementById("myRange"),
+    sliderValue: document.getElementById("sliderValue"),
+    form: document.querySelector("form")
+};
+
+// Validate critical elements exist
+if (!elements.submitButton || !elements.inputText || !elements.chatHistory) {
+    console.error('Critical DOM elements not found. Please check HTML structure.');
 }
 
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Safely adds text content to an element, preserving line breaks
+ * @param {HTMLElement} element - Element to add text to
+ * @param {string} text - Text to add
+ */
+function addTextContentSafely(element, text) {
+    // Clear any existing content
+    element.textContent = '';
+    
+    // Split by newlines and create text nodes with <br> elements
+    const lines = text.split('\n');
+    
+    lines.forEach((line, index) => {
+        // Add text node (automatically escapes HTML)
+        if (line) {
+            element.appendChild(document.createTextNode(line));
+        }
+        
+        // Add <br> element between lines (except after last line)
+        if (index < lines.length - 1) {
+            element.appendChild(document.createElement('br'));
+        }
+    });
+}
+
+/**
+ * Checks if user is near the bottom of chat history
+ * @returns {boolean}
+ */
+function isNearBottom() {
+    const { chatHistory } = elements;
+    const scrollTop = chatHistory.scrollTop;
+    const scrollHeight = chatHistory.scrollHeight;
+    const clientHeight = chatHistory.clientHeight;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    return distanceFromBottom <= CONFIG.SCROLL_THRESHOLD;
+}
+
+/**
+ * Scrolls chat history to bottom smoothly
+ */
 function scrollToBottom() {
-    chatHistory.scrollTo({
-        top: chatHistory.scrollHeight,
+    elements.chatHistory.scrollTo({
+        top: elements.chatHistory.scrollHeight,
         behavior: 'smooth'
     });
 }
 
-chatHistory.addEventListener("scroll", () => {
-    shouldAutoScroll = isNearButton();
-});
+/**
+ * Debounce function to limit function calls
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Wait time in ms
+ * @returns {Function} - Debounced function
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
+// ============================================================================
+// MESSAGE MANAGEMENT
+// ============================================================================
+
+/**
+ * Creates and appends a message to chat history
+ * @param {string} text - Message text
+ * @param {string} sender - 'user' or 'bot'
+ */
+function addMessage(text, sender) {
+    if (!text || !sender) return;
+
+    const message = document.createElement("div");
+    message.className = `message ${sender}`;
+    message.setAttribute("role", "log");
+
+    // Create avatar
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.setAttribute("aria-hidden", "true");
+
+    const icon = document.createElement("i");
+    icon.setAttribute("data-lucide", sender === "user" ? "user" : "bot");
+    icon.className = "lucide-icon";
+    avatar.appendChild(icon);
+
+    // Create message bubble
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    // Safely add text content using DOM methods (XSS-safe)
+    addTextContentSafely(bubble, text);
+    bubble.setAttribute("aria-label", `${sender} message: ${text}`);
+
+    message.appendChild(avatar);
+    message.appendChild(bubble);
+    elements.chatHistory.appendChild(message);
+
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+
+    // Auto-scroll if user is near bottom
+    if (state.shouldAutoScroll) {
+        setTimeout(scrollToBottom, 100);
+    }
+}
+
+/**
+ * Shows typing indicator
+ * @returns {HTMLElement} - The typing indicator element
+ */
 function showTypingIndicator() {
     const message = document.createElement("div");
     message.className = "message bot typing-indicator";
@@ -59,7 +179,7 @@ function showTypingIndicator() {
 
     const icon = document.createElement("i");
     icon.setAttribute("data-lucide", "bot");
-    icon.className="lucide-icon";
+    icon.className = "lucide-icon";
     avatar.appendChild(icon);
 
     const bubble = document.createElement("div");
@@ -68,197 +188,182 @@ function showTypingIndicator() {
 
     message.appendChild(avatar);
     message.appendChild(bubble);
-    chatHistory.appendChild(message);
+    elements.chatHistory.appendChild(message);
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 
-    if (shouldAutoScroll) {
+    if (state.shouldAutoScroll) {
         setTimeout(scrollToBottom, 0);
     }
+
     return message;
 }
 
+/**
+ * Removes typing indicator from chat
+ */
 function removeTypingIndicator() {
-    const typingIndicator = document.querySelector(".typing-indicator");
+    const typingIndicator = elements.chatHistory.querySelector(".typing-indicator");
     if (typingIndicator) {
         typingIndicator.remove();
     }
 }
 
-
-function addMessage(text, sender) {
-    const message = document.createElement("div");
-    message.className = `message ${sender}`;
-    message.setAttribute("role", "log");
-
-    const avatar = document.createElement("div");
-    avatar.className = "avatar";
-    avatar.setAttribute("aria-hidden", "true");
-
-    const icon = document.createElement("i");
-    icon.setAttribute("data-lucide", sender === "user" ? "user" : "bot");
-    icon.className = "lucide-icon";
-    avatar.appendChild(icon);
-    
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    // Replace line breaks with <br> tags for proper HTML rendering
-    bubble.innerHTML = text.replace(/\n/g, '<br>');
-    bubble.setAttribute("aria-label", `${sender} message: ${text}`);
-    
-    message.appendChild(avatar);
-    message.appendChild(bubble);
-    chatHistory.appendChild(message); 
-
-    lucide.createIcons();
-    
-    // Auto-scroll after message is added
-    if (shouldAutoScroll) {
-        setTimeout(scrollToBottom, 100);
-    }
-}
-
+/**
+ * Sets loading state for input and button
+ * @param {boolean} loading - Loading state
+ */
 function setLoadingState(loading) {
-    isProcessing = loading;
-    submitButton.disabled = loading;
-    inputText.disabled = loading;
-    
+    state.isProcessing = loading;
+    elements.submitButton.disabled = loading;
+    elements.inputText.disabled = loading;
+
     if (loading) {
-        submitButton.classList.add("loading");
-        submitButton.setAttribute("aria-busy", "true");
+        elements.submitButton.classList.add("loading");
+        elements.submitButton.setAttribute("aria-busy", "true");
     } else {
-        submitButton.classList.remove("loading");
-        submitButton.setAttribute("aria-busy", "false");
-        inputText.focus();
+        elements.submitButton.classList.remove("loading");
+        elements.submitButton.setAttribute("aria-busy", "false");
+        elements.inputText.focus();
     }
 }
 
+// ============================================================================
+// API COMMUNICATION
+// ============================================================================
+
+/**
+ * Parses and formats Q&A response text
+ * @param {string} text - Raw response text
+ * @returns {string} - Formatted text
+ */
 function parseQuestionAnswer(text) {
     if (!text) return text;
-    
-    // Remove all dashes and equal signs
+
+    // Remove dashes and equal signs
     let cleaned = text.replace(/[-=]/g, '');
-    
+
     // Split by "Question:" to get individual Q&A pairs
     const qaPairs = cleaned.split(/Question:/i).filter(pair => pair.trim());
-    
+
+    if (qaPairs.length === 0) return cleaned.trim();
+
     let formatted = '';
-    
+
     qaPairs.forEach((pair, index) => {
-        // Split by "Answer:" to separate question and answer
         const parts = pair.split(/Answer:/i);
-        
+
         if (parts.length === 2) {
             const question = parts[0].trim();
             const answer = parts[1].trim();
-            
-            // Add spacing and line breaks
+
             if (index > 0) {
-                formatted += '\n\n'; // Add spacing between Q&A pairs
+                formatted += '\n\n';
             }
-            formatted += `Question:\n${question}\n\nAnswer:\n ${answer}`;
+            formatted += `Question:\n${question}\n\nAnswer:\n${answer}`;
         } else {
-            // If format doesn't match, just add the text as-is
             formatted += (index > 0 ? '\n\n' : '') + pair.trim();
         }
     });
-    
+
     return formatted || cleaned.trim();
 }
 
-function sendMessage() {
-    /* Prevent multiple simultaneous sends */
-    if (isProcessing) return;
+/**
+ * Sends message to API and handles response
+ * @param {string} question - User's question
+ */
+async function sendMessageToAPI(question) {
+    const numResults = parseInt(elements.slider?.value || CONFIG.SLIDER_DEFAULT, 10);
 
-    /* Grab User Input */
-    const text = inputText.value.trim(); 
-    if (!text) {
-        inputText.focus();
-        return;
-    }
+    try {
+        const response = await fetch(CONFIG.API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question,
+                lang: CONFIG.API_LANG,
+                num_results: numResults,
+                score_threshold: null
+            })
+        });
 
-    /* Hide example questions after first message */
-    const exampleSection = document.querySelector(".chat-example");
-    if (exampleSection && exampleSection.style.display !== "none") {
-        exampleSection.style.display = "none";
-    }
-
-    /* Append Message to Chat History */
-    addMessage(text, "user");
-    inputText.value = "";
-    
-    /* Set loading state */
-    setLoadingState(true);
-    
-    /* Show typing indicator */
-    showTypingIndicator();
-    
-    /* CALL BACKEND RAG API DIRECTLY */
-    fetch('http://20.168.112.204:8000/rag/query', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            question: text,
-            lang: 'en',  // Default to English, can be made configurable
-            num_results: 1,
-            score_threshold: null
-        })
-    })
-    .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
-    })
-    .then(data => {
-        // Remove typing indicator
+
+        const data = await response.json();
         removeTypingIndicator();
-        
-        // Extract result from response (same format as call_back.py)
-        const result = data.result || data.answer || "(no result field in response)";
-        // Parse and format the Q&A response
+
+        const result = data.result || data.answer || "Sorry, I couldn't process that request.";
         const formattedResult = parseQuestionAnswer(result);
         addMessage(formattedResult, "bot");
-    })
-    .catch(error => {
+
+    } catch (error) {
         console.error("Error calling API:", error);
-        // Remove typing indicator
         removeTypingIndicator();
         addMessage("Sorry, I encountered an error connecting to the backend. Please try again.", "bot");
-    })
-    .finally(() => {
-        // Reset loading state
+    } finally {
         setLoadingState(false);
-    });
+    }
 }
 
-/* Event Listeners */
-submitButton.addEventListener("click", sendMessage);
+// ============================================================================
+// USER INTERACTIONS
+// ============================================================================
 
-inputText.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
+/**
+ * Handles sending a message
+ */
+function sendMessage() {
+    if (state.isProcessing) return;
+
+    const text = elements.inputText.value.trim();
+    if (!text) {
+        elements.inputText.focus();
+        return;
     }
-});
 
-// Handle example question clicks
-const exampleSection = document.querySelector(".chat-example");
-const exampleItems = document.querySelectorAll(".chat-example ul li");
+    // Hide example questions after first message
+    if (elements.exampleSection && elements.exampleSection.style.display !== "none") {
+        elements.exampleSection.style.display = "none";
+    }
 
+    // Add user message
+    addMessage(text, "user");
+    elements.inputText.value = "";
+
+    // Set loading state
+    setLoadingState(true);
+    showTypingIndicator();
+
+    // Send to API
+    sendMessageToAPI(text);
+}
+
+/**
+ * Handles example question click
+ * @param {Event} event - Click event
+ */
 function handleExampleClick(event) {
-    if (isProcessing) return;
-    
+    if (state.isProcessing) return;
+
     const questionText = event.target.textContent.trim();
     if (!questionText) return;
-    
-    exampleSection.style.display = "none";
-    inputText.value = questionText;
+
+    elements.exampleSection.style.display = "none";
+    elements.inputText.value = questionText;
     sendMessage();
 }
 
+/**
+ * Handles example question keyboard interaction
+ * @param {KeyboardEvent} event - Keyboard event
+ */
 function handleExampleKeydown(event) {
     if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
@@ -266,51 +371,123 @@ function handleExampleKeydown(event) {
     }
 }
 
-exampleItems.forEach(item => {
-    item.addEventListener("click", handleExampleClick);
-    item.addEventListener("keydown", handleExampleKeydown);
-});
+// ============================================================================
+// SLIDER FUNCTIONALITY
+// ============================================================================
 
-// Prevent form submission if form element exists
-const form = document.querySelector("form");
-if (form) {
-    form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        sendMessage();
+/**
+ * Initializes slider functionality
+ */
+function initializeSlider() {
+    const { slider, sliderValue } = elements;
+
+    if (!slider || !sliderValue) return;
+
+    function updateSliderValue() {
+        sliderValue.textContent = slider.value;
+    }
+
+    updateSliderValue();
+    slider.addEventListener("input", updateSliderValue);
+    slider.addEventListener("change", updateSliderValue);
+}
+
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
+
+/**
+ * Initializes all event listeners
+ */
+function initializeEventListeners() {
+    // Send button
+    if (elements.submitButton) {
+        elements.submitButton.addEventListener("click", sendMessage);
+    }
+
+    // Input field - Enter key
+    if (elements.inputText) {
+        elements.inputText.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    }
+
+    // Example questions
+    elements.exampleItems.forEach(item => {
+        item.addEventListener("click", handleExampleClick);
+        item.addEventListener("keydown", handleExampleKeydown);
+    });
+
+    // Form submission prevention
+    if (elements.form) {
+        elements.form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            sendMessage();
+        });
+    }
+
+    // Chat history scroll tracking
+    if (elements.chatHistory) {
+        elements.chatHistory.addEventListener("scroll", () => {
+            state.shouldAutoScroll = isNearBottom();
+        });
+    }
+
+    // Window resize handler
+    const handleResize = debounce(() => {
+        if (state.shouldAutoScroll) {
+            scrollToBottom();
+        }
+    }, CONFIG.RESIZE_DEBOUNCE);
+
+    window.addEventListener("resize", handleResize);
+
+    // Prevent page refresh during message sending
+    window.addEventListener("beforeunload", (event) => {
+        if (state.isProcessing) {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
+        }
+    });
+
+    // Global error handler
+    window.addEventListener("error", (event) => {
+        console.error("Global error:", event.error);
     });
 }
 
-// Auto-focus input on load (better UX)
-window.addEventListener("load", () => {
-    inputText.focus();
-});
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
-// Handle window resize for better mobile experience
-let resizeTimer;
-window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        if (shouldAutoScroll) {
-            scrollToBottom();
-        }
-    }, 250);
-});
-
-// Initialize Lucide icons
-lucide.createIcons();
-
-// Add error handling for network issues or API failures
-window.addEventListener("error", (event) => {
-    console.error("Global error:", event.error);
-});
-
-// Prevent accidental page refresh during message sending
-window.addEventListener("beforeunload", (event) => {
-    if (isProcessing) {
-        event.preventDefault();
-        event.returnValue = "";
-        return "";
+/**
+ * Initializes the application
+ */
+function initialize() {
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
-});
 
+    // Initialize slider
+    initializeSlider();
 
+    // Initialize event listeners
+    initializeEventListeners();
+
+    // Auto-focus input on load
+    if (elements.inputText) {
+        elements.inputText.focus();
+    }
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+} else {
+    initialize();
+}
