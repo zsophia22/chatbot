@@ -53,11 +53,11 @@ if (!elements.submitButton || !elements.inputText || !elements.chatHistory) {
 // ============================================================================
 
 /**
- * Safely adds text content to an element, preserving line breaks
+ * Adds text content to an element, preserving line breaks
  * @param {HTMLElement} element - Element to add text to
  * @param {string} text - Text to add
  */
-function addTextContentSafely(element, text) {
+function addTextContent(element, text) {
     // Clear any existing content
     element.textContent = '';
     
@@ -147,8 +147,7 @@ function addMessage(text, sender) {
     // Create message bubble
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    // Safely add text content using DOM methods (XSS-safe)
-    addTextContentSafely(bubble, text);
+    addTextContent(bubble, text);
     bubble.setAttribute("aria-label", `${sender} message: ${text}`);
 
     message.appendChild(avatar);
