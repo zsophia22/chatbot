@@ -19,19 +19,19 @@
             <p>Ask me application related questions!</p>
         </header>
         <section class="chatbot-section" aria-label="Chat conversation"> 
-            <div class="chat-history" role="log" aria-live="polite" aria-label="Chat messages">
-                <div class="slidecontainer">
-                    <div class="slider-wrapper">
-                        <div class="slider-info-wrapper">
-                            <div class="info-icon-wrapper">
-                                <i class="fa-solid fa-circle-info info-icon" aria-label="Number of answers to retrieve"></i>
-                                <span class="info-tooltip">Number of answers to retrieve</span>
-                            </div>
-                            <input type="range" min="1" max="10" value="1" class="slider" id="myRange" aria-label="Number of answers to retrieve">
+            <div class="slidecontainer">
+                <div class="slider-wrapper">
+                    <div class="slider-info-wrapper">
+                        <div class="info-icon-wrapper">
+                            <i class="fa-solid fa-circle-info info-icon" aria-label="Number of answers to retrieve"></i>
+                            <span class="info-tooltip">Number of answers to retrieve</span>
                         </div>
-                        <span class="slider-value" id="sliderValue" aria-live="polite">1</span>
+                        <input type="range" min="1" max="10" value="1" class="slider" id="myRange" aria-label="Number of answers to retrieve">
                     </div>
+                    <span class="slider-value" id="sliderValue" aria-live="polite">1</span>
                 </div>
+            </div>
+            <div class="chat-history" role="log" aria-live="polite" aria-label="Chat messages">
                 <div class="message bot">
                     <div class="avatar" aria-hidden="true">
                         <i data-lucide="bot" class="lucide-icon"></i>
