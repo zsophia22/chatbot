@@ -8,7 +8,7 @@
 // ============================================================================
 
 const CONFIG = {
-    API_URL: 'http://20.168.112.204:8000/rag/query',
+    API_URL: 'api/rag/query',
     API_LANG: 'en',
     SCROLL_THRESHOLD: 100,
     SCROLL_DEBOUNCE: 250,
